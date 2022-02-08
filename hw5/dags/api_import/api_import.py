@@ -22,7 +22,7 @@ def api_import_task(**kwargs):
     print('\tRetrieving data ')
     data = api.out_of_stock(date)
 
-    print('\tSaving data')
+    print('\tSaving data to Hadoop')
     storage.save(date, data)
 
 
