@@ -1,13 +1,14 @@
 import json
 import os
 from hdfs import InsecureClient
+from airflow.models import Variable
 
 
 class Storage:
     def __init__(self, config, key):
         self.__config = config
         self.__key = key
-        self.__hadoop_client = InsecureClient(url=self.__config['hadoop']['url'], user=self.__config['hadoop']['user'])
+        self.__hadoop_client = InsecureClient(**Variable.get('HDFS_CREDENTIALS', deserialize_json=True))
 
     def save(self, name, data):
         self.__create_directory(name)

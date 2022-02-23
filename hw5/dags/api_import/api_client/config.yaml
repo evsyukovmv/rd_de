@@ -1,14 +1,9 @@
 robot_dreams_de:
   api:
+    timeout: 60
     base_url: "https://robot-dreams-de-api_client.herokuapp.com"
     endpoints:
       authentication: "/auth"
       out_of_stock: "/out_of_stock"
-    credentials:
-      username: "secret"
-      password: "secret"
   storage:
-    hadoop:
-      'url': 'http://192.168.31.7:50070/'
-      'user': 'user'
     path: "/bronze/api_dump/"

@@ -1,5 +1,6 @@
 import requests
 import json
+from airflow.models import Variable
 
 
 class Api:
@@ -9,11 +10,13 @@ class Api:
 
     def authenticate(self):
         url = self.__url_for('authentication')
-        data = {
-            "username": self.__config['credentials']['username'],
-            "password": self.__config['credentials']['password']
-        }
-        response = requests.post(url, headers=self.__headers(), data=json.dumps(data))
+
+        response = requests.post(
+            url,
+            headers=self.__headers(),
+            data=json.dumps(Variable.get('API_CREDENTIALS', deserialize_json=True)),
+            timeout=self.__config['timeout']
+        )
         self.__validate_response(response)
 
         return response.json()
@@ -21,8 +24,14 @@ class Api:
     def out_of_stock(self, date):
         url = self.__url_for('out_of_stock')
         data = {"date": date}
-        response = requests.get(url, headers=self.__headers(auth=True), data=json.dumps(data))
+        response = requests.get(
+            url,
+            headers=self.__headers(auth=True),
+            data=json.dumps(data),
+            timeout=self.__config['timeout']
+        )
         self.__validate_response(response)
+
         return response.json()
 
     def __url_for(self, endpoint):
