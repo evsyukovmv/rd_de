@@ -2,13 +2,13 @@ from pyspark.sql import SparkSession
 from pyspark.sql.window import Window
 import pyspark.sql.functions as F
 
-pg_url = "jdbc:postgresql://localhost:5432/postgres"
-pg_properties = {"user": "gpuser", "password": "secret"}
+pg_url = "jdbc:postgresql://localhost:5432/pagila"
+pg_properties = {"user": "pguser", "password": "secret"}
 
 spark = SparkSession.builder \
-    .config('spark.driver.extraClassPath', '/home/user/shared_folder/postgresql-42.2.20.jar') \
+    .config('spark.driver.extraClassPath', '/home/user/VM_Shared/postgresql-42.3.3.jar') \
     .master('local') \
-    .appName("lesson") \
+    .appName('lesson') \
     .getOrCreate()
 
 category_df = spark.read.jdbc(pg_url, table="category", properties=pg_properties)
@@ -63,7 +63,6 @@ city_df.join(address_df, 'city_id').join(customer_df, 'address_id').groupBy('cit
 # 7. вывести категорию фильмов, у которой самое большое кол-во часов суммарной аренды в городах
 # (customer.address_id в этом city), и которые начинаются на букву “a”.
 # То же самое сделать для городов в которых есть символ “-”. Написать все в одном запросе.
-
 (category_df
  .join(film_category_df, 'category_id', 'left')
  .join(inventory_df, 'film_id', 'left')
@@ -73,7 +72,7 @@ city_df.join(address_df, 'city_id').join(customer_df, 'address_id').groupBy('cit
  .join(city_df, 'city_id', 'inner')
  .where('city like "a%"')
  .groupBy('category_id')
- .agg(F.sum(F.col('return_date') - F.col('rental_date')).alias('rent_duration'))
+ .agg(F.sum(F.col('return_date').cast('long') - F.col('rental_date').cast('long')).alias('rent_duration'))
  .orderBy(F.desc('rent_duration'))
  .limit(1)
  ).unionByName(
@@ -86,7 +85,7 @@ city_df.join(address_df, 'city_id').join(customer_df, 'address_id').groupBy('cit
         .join(city_df, 'city_id', 'inner')
         .where('city like "%-%"')
         .groupBy('category_id')
-        .agg(F.sum(F.col('return_date') - F.col('rental_date')).alias('rent_duration'))
+        .agg(F.sum(F.col('return_date').cast('long') - F.col('rental_date').cast('long')).alias('rent_duration'))
         .orderBy(F.desc('rent_duration'))
         .limit(1)
 ).show()
